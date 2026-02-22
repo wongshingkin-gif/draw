@@ -181,7 +181,7 @@
         const url = GOOGLE_SHEET_URL.trim();
         const statusSpan = document.getElementById('syncStatus');
 
-        if (!url || url === "在此貼上您的 Google Sheet CSV 網址") {
+        if (!url || url === "https://docs.google.com/spreadsheets/d/e/2PACX-1vQARvJaMm-oTTmOA8NhDUa76NMwztBMiJou0kKI0YmgEWGYrwQHwHuCXIR0VuKOeiJJQWzWr98NEWWP/pub?output=csv") {
             statusSpan.innerText = "⚠️ 請在程式碼中設定 Google Sheet 網址！";
             statusSpan.style.color = "#d63031";
             document.getElementById('groupSelect').innerHTML = '<option value="">請設定網址</option>';
@@ -357,3 +357,4 @@
 </script>
 </body>
 </html>
+
