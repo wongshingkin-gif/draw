@@ -1,5 +1,5 @@
 {
-  "name": "幸運抽籤系統",
+  "name": "Simon抽籤系統",
   "short_name": "抽籤",
   "start_url": "./index.html",
   "display": "standalone",
@@ -8,16 +8,17 @@
   "description": "方便好用的課堂與活動抽籤工具",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "draw.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "draw.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ]
+
 }
