@@ -6,7 +6,7 @@
     <title>✨ 超級幸運抽籤 3.0</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6c5ce7">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="draw.png">
     
     <style>
         :root {
@@ -39,7 +39,6 @@
             text-align: center;
             position: relative;
             backdrop-filter: blur(10px);
-            /* 針對手機版微調 */
             box-sizing: border-box;
             margin: 20px 0;
         }
@@ -55,7 +54,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         .control-panel { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: left; }
-
+        
         select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ced6e0; margin-bottom: 10px; font-size: 1rem; }
         input[type="number"], textarea { width: 100%; padding: 12px; border: 2px solid #dfe6e9; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
         textarea { height: 100px; resize: vertical; }
@@ -81,7 +80,7 @@
         .winner-anim { color: var(--accent) !important; animation: popIn 0.5s forwards; }
 
         #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
-        .status-msg { font-size: 0.8rem; color: #e17055; margin-bottom: 10px; display: block; }
+        .status-msg { font-size: 0.9rem; margin-bottom: 10px; display: block; font-weight: bold;}
     </style>
 </head>
 <body>
@@ -107,7 +106,7 @@
 
     <div id="section-name" class="input-section">
         <div class="control-panel">
-            <span id="syncStatus" class="status-msg">⏳ 正在連線至 Google Sheet...</span>
+            <span id="syncStatus" class="status-msg">⏳ 正在載入名單...</span>
             
             <select id="groupSelect" onchange="changeGroup()">
                 <option value="">載入中...</option>
@@ -143,15 +142,14 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(registration => console.log('ServiceWorker 註冊成功'))
                 .catch(err => console.log('ServiceWorker 註冊失敗: ', err));
         });
     }
 
     // ==========================================
-    // 💡 在這裡設定您的 Google Sheet (CSV) 網址
+    // 👇 請將你的 Apps Script 網頁應用程式網址貼在這裡 👇
     // ==========================================
-    const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQARvJaMm-oTTmOA8NhDUa76NMwztBMiJou0kKI0YmgEWGYrwQHwHuCXIR0VuKOeiJJQWzWr98NEWWP/pub?output=csv";
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbznZ_6tmprlYgMLMxmJao3G857ecSlcxgu5II343nqoJJVbCdLR2HD7n5C3vldhGpfc/exec';
     // ==========================================
 
     let currentMode = 'number';
@@ -160,7 +158,6 @@
     let sheetGroups = {};
 
     window.onload = () => {
-        // 載入時自動抓取 Google Sheet 資料
         fetchSheetData();
         resetPool(true);
     };
@@ -178,11 +175,10 @@
     }
 
     async function fetchSheetData() {
-        const url = GOOGLE_SHEET_URL.trim();
         const statusSpan = document.getElementById('syncStatus');
-
-        if (!url || url === "https://docs.google.com/spreadsheets/d/e/2PACX-1vQARvJaMm-oTTmOA8NhDUa76NMwztBMiJou0kKI0YmgEWGYrwQHwHuCXIR0VuKOeiJJQWzWr98NEWWP/pub?output=csv") {
-            statusSpan.innerText = "⚠️ 請在程式碼中設定 Google Sheet 網址！";
+        
+        if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === '請貼上你的_APP_SCRIPT_網址') {
+            statusSpan.innerText = "⚠️ 請在程式碼中設定 Apps Script 網址！";
             statusSpan.style.color = "#d63031";
             document.getElementById('groupSelect').innerHTML = '<option value="">請設定網址</option>';
             return;
@@ -192,41 +188,25 @@
         statusSpan.style.color = "#0984e3";
 
         try {
-            const response = await fetch(url);
+            const response = await fetch(APPS_SCRIPT_URL);
             if (!response.ok) throw new Error('網路回應錯誤');
-            const csvText = await response.text();
             
-            parseCSV(csvText);
+            // 直接將 Apps Script 回傳的 JSON 轉為物件
+            sheetGroups = await response.json(); 
+            
+            updateGroupSelect();
             
             statusSpan.innerText = "✅ Google Sheet 名單載入成功！";
             statusSpan.style.color = "#00b894";
         } catch (error) {
-            statusSpan.innerText = "❌ 載入失敗，請確認網址格式及共用權限。";
+            statusSpan.innerText = "❌ 載入失敗，請確認網址及 Apps Script 權限設定。";
             statusSpan.style.color = "#d63031";
             console.error(error);
         }
     }
 
-    function parseCSV(csvText) {
-        const rows = csvText.split('\n').map(row => row.split(','));
-        if (rows.length === 0) return;
-
-        sheetGroups = {};
-        const headers = rows[0];
-
-        for (let i = 0; i < headers.length; i++) {
-            const groupName = headers[i].trim();
-            if (groupName) {
-                sheetGroups[groupName] = [];
-                for (let j = 1; j < rows.length; j++) {
-                    if (rows[j][i] !== undefined && rows[j][i].trim() !== '') {
-                        let name = rows[j][i].trim().replace(/^"|"$/g, '');
-                        sheetGroups[groupName].push(name);
-                    }
-                }
-            }
-        }
-
+    // 更新下拉選單
+    function updateGroupSelect() {
         const select = document.getElementById('groupSelect');
         select.innerHTML = '';
         Object.keys(sheetGroups).forEach(key => {
@@ -235,7 +215,6 @@
             option.text = `${key} (${sheetGroups[key].length}人)`;
             select.appendChild(option);
         });
-
         changeGroup();
     }
 
@@ -357,4 +336,3 @@
 </script>
 </body>
 </html>
-
