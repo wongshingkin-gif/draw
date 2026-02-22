@@ -6,7 +6,7 @@
     <title>✨ 超級幸運抽籤 3.0</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6c5ce7">
-    <link rel="apple-touch-icon" href="draw.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
     
     <style>
         :root {
@@ -151,7 +151,7 @@
     // ==========================================
     // 💡 在這裡設定您的 Google Sheet (CSV) 網址
     // ==========================================
-    const GOOGLE_SHEET_URL = "在此貼上您的 Google Sheet CSV 網址";
+    const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQARvJaMm-oTTmOA8NhDUa76NMwztBMiJou0kKI0YmgEWGYrwQHwHuCXIR0VuKOeiJJQWzWr98NEWWP/pub?output=csv";
     // ==========================================
 
     let currentMode = 'number';
@@ -181,7 +181,7 @@
         const url = GOOGLE_SHEET_URL.trim();
         const statusSpan = document.getElementById('syncStatus');
 
-        if (!url || url === "https://docs.google.com/spreadsheets/d/e/2PACX-1vQARvJaMm-oTTmOA8NhDUa76NMwztBMiJou0kKI0YmgEWGYrwQHwHuCXIR0VuKOeiJJQWzWr98NEWWP/pub?output=csv") {
+        if (!url || url === "在此貼上您的 Google Sheet CSV 網址") {
             statusSpan.innerText = "⚠️ 請在程式碼中設定 Google Sheet 網址！";
             statusSpan.style.color = "#d63031";
             document.getElementById('groupSelect').innerHTML = '<option value="">請設定網址</option>';
